@@ -1,4 +1,4 @@
-﻿@model NyloStreetwearMVC1.Data.Entities.Product
+﻿@model NyloStreetwearMVC1.Models.Product.ProductCreateOrEditViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -32,6 +32,11 @@
                 <label asp-for="ImageUrl" class="control-label"></label>
                 <input asp-for="ImageUrl" class="form-control" />
                 <span asp-validation-for="ImageUrl" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedCategoryIds" class="control-label"></label>
+                <select asp-for="SelectedCategoryIds" class="form-control" asp-items="ViewBag.Categories" multiple></select>
+                <span asp-validation-for="SelectedCategoryIds" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
