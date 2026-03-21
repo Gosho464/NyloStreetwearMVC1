@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NyloStreetwearMVC1.Data;
 using NyloStreetwearMVC1.Data.Entities;
+using NyloStreetwearMVC1.Models.Product;
 
 namespace NyloStreetwearMVC1.Controllers
 {
@@ -46,6 +47,7 @@ namespace NyloStreetwearMVC1.Controllers
         // GET: Products/Create
         public IActionResult Create()
         {
+            ViewBag.Categories = new SelectList(_context.Category, "Id", "Name");
             return View();
         }
 
@@ -54,15 +56,42 @@ namespace NyloStreetwearMVC1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,Price,ImageUrl")] Product product)
+        public async Task<IActionResult> Create(ProductCreateOrEditViewModel model)
         {
             if (ModelState.IsValid)
             {
+                //map viewmodel to entity
+                var product = new Product
+                {
+                    Title = model.Title,
+                    Description = model.Description,
+                    Price = model.Price,
+                    ImageUrl = model.ImageUrl
+                };
+
                 _context.Add(product);
                 await _context.SaveChangesAsync();
+
+                //process categories
+                if (model.SelectedCategoryIds != null)
+                {
+                    foreach (var categoryId in model.SelectedCategoryIds)
+                    {
+                        var productCategory = new ProductCategory
+                        {
+                            ProductId = product.Id,
+                            CategoryId = categoryId
+                        };
+                        _context.Add(productCategory);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+
+            ViewBag.Categories = new SelectList(_context.Category, "Id", "Name");
+            return View(model);
         }
 
         // GET: Products/Edit/5
@@ -78,7 +107,22 @@ namespace NyloStreetwearMVC1.Controllers
             {
                 return NotFound();
             }
-            return View(product);
+
+            var model = new ProductCreateOrEditViewModel
+            {
+                Id = product.Id,
+                Title = product.Title,
+                Description = product.Description,
+                Price = product.Price,
+                ImageUrl = product.ImageUrl,
+                SelectedCategoryIds = _context.ProductCategories
+                    .Where(pc => pc.ProductId == product.Id)
+                    .Select(pc => pc.CategoryId)
+                    .ToList()
+            };
+
+            ViewBag.Categories = new SelectList(_context.Category, "Id", "Name");
+            return View(model);
         }
 
         // POST: Products/Edit/5
@@ -86,9 +130,9 @@ namespace NyloStreetwearMVC1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,Price,ImageUrl")] Product product)
+        public async Task<IActionResult> Edit(int id, ProductCreateOrEditViewModel model)
         {
-            if (id != product.Id)
+            if (id != model.Id)
             {
                 return NotFound();
             }
@@ -97,12 +141,40 @@ namespace NyloStreetwearMVC1.Controllers
             {
                 try
                 {
+                    //map model to entity
+                    var product = await _context.Product.FindAsync(id);
+                    if (product == null)
+                    {
+                        return NotFound();
+                    }
+                    product.Title = model.Title;
+                    product.Description = model.Description;
+                    product.Price = model.Price;
+                    product.ImageUrl = model.ImageUrl;
                     _context.Update(product);
                     await _context.SaveChangesAsync();
+
+                    //update categories
+                    var existingCategories = _context.ProductCategories.Where(pc => pc.ProductId == id).ToList();
+                    if (model.SelectedCategoryIds != null)
+                    {
+                        _context.ProductCategories.RemoveRange(existingCategories);
+                        foreach (var categoryId in model.SelectedCategoryIds)
+                        {
+                            var productCategory = new ProductCategory
+                            {
+                                ProductId = id,
+                                CategoryId = categoryId
+                            };
+                            _context.Add(productCategory);
+                        }
+                        await _context.SaveChangesAsync();
+                    }
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.Id))
+                    if (!ProductExists(model.Id))
                     {
                         return NotFound();
                     }
@@ -113,7 +185,9 @@ namespace NyloStreetwearMVC1.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+
+            ViewBag.Categories = new SelectList(_context.Category, "Id", "Name");
+            return View(model);
         }
 
         // GET: Products/Delete/5
