@@ -43,5 +43,7 @@ namespace NyloStreetwearMVC1.Data
         }   
         public DbSet<NyloStreetwearMVC1.Data.Entities.Category> Category { get; set; } = default!;
         public DbSet<NyloStreetwearMVC1.Data.Entities.Product> Product { get; set; } = default!;
+
+        public DbSet<NyloStreetwearMVC1.Data.Entities.ProductCategory> ProductCategories { get; set; } = default!;
     }
 }
