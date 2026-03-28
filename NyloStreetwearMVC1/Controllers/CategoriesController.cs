@@ -28,19 +28,21 @@ namespace NyloStreetwearMVC1.Controllers
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+
+    
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var category = await _context.Category
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(c => c.ProductCategories)
+                    .ThenInclude(pc => pc.Product)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (category == null)
-            {
                 return NotFound();
-            }
 
             return View(category);
+        
         }
 
         // GET: Categories/Create
@@ -152,6 +154,24 @@ namespace NyloStreetwearMVC1.Controllers
         private bool CategoryExists(int id)
         {
             return _context.Category.Any(e => e.Id == id);
+        }
+        // GET: Categories/ByCategory/Men
+        public async Task<IActionResult> ByCategory(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return NotFound();
+
+            // Find the category and include products
+            var category = await _context.Category
+                .Include(c => c.ProductCategories)
+                    .ThenInclude(pc => pc.Product)
+                .FirstOrDefaultAsync(c => c.Name == name);
+
+            if (category == null)
+                return NotFound();
+
+            // Return a view showing all products in this category
+            return View("CategoryProducts", category); // We'll create CategoryProducts.cshtml
         }
     }
 }

@@ -20,3 +20,42 @@ html {
 body {
   margin-bottom: 60px;
 }
+.photo:hover {
+    transform: scale(1.05);
+    transition: 0.3s ease;
+}
+
+.hero-section {
+    height: 60vh;
+    background: url('/imgs/bg.webp') center/cover no-repeat;
+    position: relative;
+}
+
+    /* dark overlay */
+    .hero-section::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    /* keep text above overlay */
+    .hero-section .container {
+        position: relative;
+        z-index: 2;
+    }
+
+.navbar-nav .nav-link {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    color: #fff;
+}
+
+    .navbar-nav .nav-link:hover {
+        color: #f8f9fa;
+        opacity: 0.8;
+    }
+
+.dropdown-menu {
+    border-radius: 10px;
+}
