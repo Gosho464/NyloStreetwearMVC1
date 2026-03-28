@@ -1,17 +1,17 @@
 ﻿@model List<NyloStreetwearMVC1.Data.Entities.Product>
 @{
-    ViewData["Title"] = "Men's section";
+    ViewData["Title"] = "Home Page";
     
 }
 
 <div class="text-center">
     <h1 class="display-4">Nylo Streetwear</h1>
-    <p>Men's section</p>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
 <div class="container mt-4">
     <div class="row">
         @foreach (var product in Model)
-    {
+        {
             <div class="col-md-4 mb-4">
                 <div class="card h-100 shadow-sm">
                     
